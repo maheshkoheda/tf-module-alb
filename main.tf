@@ -3,26 +3,15 @@ resource "aws_lb" "main" {
   internal           = var.internal
   load_balancer_type = var.lb_type
   security_groups    = [aws_security_group.main.id]
-  subnets            = [for subnet in aws_subnet.public : subnet.id]
-
-  enable_deletion_protection = true
-
-  access_logs {
-    bucket  = aws_s3_bucket.lb_logs.id
-    prefix  = "test-lb"
-    enabled = true
-  }
-
-  tags = {
-    Environment = "production"
-  }
+  subnets            = var.subnets
+  tags = merge(local.tags, {Name = "${var.env}-alb"})
 }
 
 resource "aws_security_group" "main" {
   name        = "${var.env}-alb-sg"
   description = "${var.env}-alb-sg"
   vpc_id      = var.vpc_id
-  tags = merge(local.tags, {Name = "${var.env}-alb-sg"}
+  tags = merge(local.tags, {Name = "${var.env}-alb-sg"})
 
   ingress {
     description      = "APP"
@@ -40,6 +29,5 @@ resource "aws_security_group" "main" {
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
-
 
 }
